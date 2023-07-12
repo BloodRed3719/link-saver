@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Link Creator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #fff;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 20px;
+    }
+
+    label {
+      margin-bottom: 10px;
+    }
+
+    input[type="text"],
+    input[type="url"] {
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+
+    button[type="submit"] {
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #0056b3;
+    }
+
+    .link-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .link-item a {
+      margin-right: 10px;
+      text-decoration: none;
+      color: #007bff;
+    }
+
+    .delete-btn {
+      color: #dc3545;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Link Creator</h1>
+  <form id="linkForm">
+    <label for="displayText">Display Text:</label>
+    <input type="text" id="displayText" name="displayText" required>
+
+    <label for="url">URL:</label>
+    <input type="url" id="url" name="url" required>
+
+    <button type="submit">Create Link</button>
+  </form>
+  <div id="linksContainer"></div>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    loadLinks();
+
+    document.getElementById('linkForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      var displayText = document.getElementById('displayText').value;
+      var url = document.getElementById('url').value;
+
+      var link = document.createElement('a');
+      link.href = url;
+      link.textContent = displayText;
+      link.target = '_blank';
+
+      var deleteBtn = document.createElement('button');
+      deleteBtn.textContent = 'Delete';
+      deleteBtn.className = 'delete-btn';
+      deleteBtn.addEventListener('click', function () {
+        link.parentNode.removeChild(link);
+        deleteLink(url);
+      });
+
+      var linkItem = document.createElement('div');
+      linkItem.className = 'link-item';
+      linkItem.appendChild(link);
+      linkItem.appendChild(deleteBtn);
+
+      document.getElementById('linksContainer').appendChild(linkItem);
+
+      saveLink(displayText, url);
+
+      document.getElementById('displayText').value = '';
+      document.getElementById('url').value = '';
+    });
+  });
+
+  function saveLink(displayText, url) {
+    var links = JSON.parse(localStorage.getItem('links')) || [];
+    links.push({ displayText: displayText, url: url });
+    localStorage.setItem('links', JSON.stringify(links));
+  }
+
+  function loadLinks() {
+    var links = JSON.parse(localStorage.getItem('links')) || [];
+    var linksContainer = document.getElementById('linksContainer');
+
+    links.forEach(function (link) {
+      var linkItem = document.createElement('div');
+      linkItem.className = 'link-item';
+
+      var linkElem = document.createElement('a');
+      linkElem.href = link.url;
+      linkElem.textContent = link.displayText;
+      linkElem.target = '_blank';
+
+      var deleteBtn = document.createElement('button');
+      deleteBtn.textContent = 'Delete';
+      deleteBtn.className = 'delete-btn';
+      deleteBtn.addEventListener('click', function () {
+        linkItem.parentNode.removeChild(linkItem);
+        deleteLink(link.url);
+      });
+
+      linkItem.appendChild(linkElem);
+      linkItem.appendChild(deleteBtn);
+
+      linksContainer.appendChild(linkItem);
+    });
+  }
+
+  function deleteLink(url) {
+    var links = JSON.parse(localStorage.getItem('links')) || [];
+    var updatedLinks = links.filter(function (link) {
+      return link.url !== url;
+    });
+    localStorage.setItem('links', JSON.stringify(updatedLinks));
+  }
+</script>
+</body>
+</html>
